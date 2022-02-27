@@ -1,9 +1,11 @@
 import numpy as np
 import time
+import sys
 
 from approvalK import approvalK
 from schulze import schulze
-import sys
+from generate_votes import generate_votes, generate_votes2
+
 
 def printf(format, *args):
     sys.stdout.write(format % args)
@@ -45,16 +47,13 @@ def difElectResult(num_cand, cab1, cab2): #measure the difference between two st
 	return sum([abs(val1[i]-val2[i]) for i in range(num_cand)])
 
 def main():
-	sim_length = 500
+	sim_length = 100
 	num_cand = 8
 	num_voters = 200
 
 	offFromSchulze = [0 for i in range(num_cand)] #sum of dif
 	for o in range(sim_length):
-		votes = []
-		for i in range(num_voters):
-			votes.append(np.random.permutation(num_cand))
-	
+		votes = generate_votes2(num_voters,num_cand)
 		# if(num_voters<10):
 		# 	print('votes:')
 		# 	print(votes)
@@ -63,7 +62,7 @@ def main():
 		rankS = schulze(num_cand,votes)
 		# print(toSTUCO(rankS))
 		num_pos1 = 1
-		num_pos2 = 1
+		num_pos2 = 3
 
 		for k in range(1,num_cand):
 			rankA = approvalK(num_cand,votes, k)
@@ -71,12 +70,29 @@ def main():
 			# print("k: "+ str(k) + " dif: "+ str(difElectResult(num_cand, toSTUCO(rankS), toSTUCO(rankA))))
 			offFromSchulze[k]+= difElectResult(num_cand, toSTUCO(rankS, num_pos1,num_pos2), toSTUCO(rankA,num_pos1,num_pos2))
 
+	# for o in range(sim_length):
+	# 	votes = generate_votes(num_voters,num_cand)
+	# 	# if(num_voters<10):
+	# 	# 	print('votes:')
+	# 	# 	print(votes)
+
+
+	# 	rankS = schulze(num_cand,votes)
+	# 	# print(toSTUCO(rankS))
+	# 	num_pos1 = 1
+	# 	num_pos2 = 1
+
+	# 	for k in range(1,num_cand):
+	# 		rankA = approvalK(num_cand,votes, k)
+	# 		# print(toSTUCO(rankA))			
+	# 		# print("k: "+ str(k) + " dif: "+ str(difElectResult(num_cand, toSTUCO(rankS), toSTUCO(rankA))))
+	# 		offFromSchulze[k]+= difElectResult(num_cand, toSTUCO(rankS, num_pos1,num_pos2), toSTUCO(rankA,num_pos1,num_pos2))
+
 	print(offFromSchulze)
 
-	best_num = offFromSchulze.index(min(offFromSchulze[1:num_cand]))	
+	best_num = offFromSchulze.index(min(offFromSchulze[1:num_cand]))
 	print(num_pos2)	
 	printf("This means that when there are n=%d candidates running for [%d,%d],\nthe \"Optimal\" number of people to vote for is: k=%d\n", num_cand, num_pos1, num_pos2, best_num)
-
 
 
 
